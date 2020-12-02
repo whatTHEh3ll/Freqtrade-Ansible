@@ -1,0 +1,79 @@
+---
+
+- name: 'checkout freqtrade repo'
+  git: 
+    repo: https://github.com/freqtrade/freqtrade.git
+    dest: /home/{{ user_name }}/freqtrade 
+    version: develop 
+
+- name: recursively change permissions for /{{ user_name }}/freqtrade
+  become: yes 
+  file:
+    path: /home/{{ user_name }}/findomain
+    state: directory
+    recurse: yes
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+        
+- name: 'install freqtrade'
+  shell: ./setup.sh --install
+  args:
+    chdir: /home/{{ user_name }}/freqtrade 
+  register: install
+
+- debug:
+    msg: "{{ install.stdout }}"
+ 
+- name: 'copy config.json to freqtrade directory'
+  copy:
+    src: ../../../../../../Ansible-Config/config.json
+    dest: /home/{{ user_name }}/freqtrade 
+    decrypt: yes
+    mode: u=rw,g=r,o=r
+ 
+- name: 'create python3 virtual enviroment'
+  shell: python3 -m venv .env
+  args:
+    chdir: /home/{{ user_name }}/freqtrade 
+  
+- name: 'create user directory'
+  shell: /bin/bash -ic 'source .env/bin/activate; python3 -m freqtrade create-userdir --userdir user_data/'
+  args:
+    chdir: /home/{{ user_name }}/freqtrade 
+
+- name: copy hyperopts directory to the remote server
+  synchronize:
+    src: hyperopts
+    dest: /home/{{ user_name }}/freqtrade/user_data/
+      
+- name: copy strategies directory to the remote server
+  synchronize:
+    src: strategies 
+    dest: /home/{{ user_name }}/freqtrade/user_data/
+
+- name: 'install download trading data for last 29 days'
+  shell: /bin/bash -ic 'source .env/bin/activate; python3 -m freqtrade download-data --timeframes 4h 1h 15m 5m 1m'
+  args:
+    chdir: /home/{{ user_name }}/freqtrade 
+
+- name: copy download-data bash script to home directory 
+  copy:
+    src: download-data.sh
+    dest: /home/{{ user_name }}
+        
+- name: create cronjob for download-data bash script 
+  cron:
+    name: download-data 
+    weekday: "1"
+    minute: "0"
+    hour: "12"
+    user: root
+    job: /home/{{ user_name }}/download-data.sh 
+
+
+
+  
+
+
+ 
+  

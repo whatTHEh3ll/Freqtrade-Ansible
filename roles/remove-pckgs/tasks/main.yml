@@ -1,0 +1,5 @@
+---
+
+- name: remove un-needed packages with bash script
+  become: yes
+  script: remove-pckgs.sh 

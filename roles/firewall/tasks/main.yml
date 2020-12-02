@@ -1,0 +1,49 @@
+---
+
+- name: Install the ufw package
+  package:
+    name: ufw
+    state: latest
+  
+- name: Install the iptables-persistent package 
+  package:
+    name: iptables-persistent
+    state: latest
+  
+- name: setup ufw rules script
+  become: yes
+  script: iptables.sh
+  
+- name: setup ufw rules script
+  become: yes
+  script: firewall.sh
+  
+- name: add lines to /etc/before.rules
+  become: yes
+  blockinfile:
+    path: /etc/ufw/before.rules 
+    state: present
+    block: |
+      ##Prevent Ping Flood##
+      -A INPUT -p icmp -m limit --limit 6/s --limit-burst 1 -j ACCEPT
+      -A INPUT -p icmp -j DROP
+
+      # allow outbound icmp
+      -A ufw-before-output -p icmp -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+      -A ufw-before-output -p icmp -m state --state ESTABLISHED,RELATED -j ACCEPT
+    insertbefore: "COMMIT"
+  
+- name: reload ufw with shell module
+  become: yes
+  shell: ufw reload
+    
+
+
+
+
+      
+
+
+
+
+  

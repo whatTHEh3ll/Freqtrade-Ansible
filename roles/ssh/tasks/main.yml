@@ -1,0 +1,99 @@
+---
+- name: Add local public key for key-based SSH authentication
+  authorized_key:
+    user: "{{ user_name }}"
+    state: present
+    key: "{{ lookup('file', public_key) }}"
+  tags: ssh 
+
+- name: Harden sshd configuration
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+  with_items:
+    - regexp: "^#?PermitRootLogin"
+      line: "PermitRootLogin no"
+    - regexp: "^#?PasswordAuthentication"
+      line: "PasswordAuthentication no"
+    - regexp: "^#?AllowAgentForwarding"
+      line: "AllowAgentForwarding no"
+    - regexp: "^#?AllowTcpForwarding"
+      line: "AllowTcpForwarding no"
+    - regexp: "^#?MaxAuthTries"
+      line: "MaxAuthTries 2"
+    - regexp: "^#?MaxSessions"
+      line: "MaxSessions 2"
+    - regexp: "^#?TCPKeepAlive"
+      line: "TCPKeepAlive no"
+    - regexp: "^#?UseDNS"
+      line: "UseDNS no"
+    - regexp: "^#?AllowAgentForwarding"
+      line: "AllowAgentForwarding no"
+    - regexp: "^#?IgnoreRhosts "
+      line: "IgnoreRhosts yes"
+    - regexp: "^#?HostbasedAuthentication"
+      line: "HostbasedAuthentication no"
+    - regexp: "^#?LoginGraceTime"
+      line: "LoginGraceTime 300"
+    - regexp: "^#MaxStartups 10:30:100$"
+      line: "MaxStartups 2"
+    - regexp: "^#?AllowTcpForwarding"
+      line: "AllowTcpForwarding no"
+    - regexp: "^X11Forwarding?"
+      line: "X11Forwarding no"
+    - regexp: "^#?StrictModes"
+      line: "StrictModes yes"
+    - regexp: "^#?ClientAliveInterval"
+      line: "ClientAliveInterval 300"
+    - regexp: "^#?ClientAliveCountMax "
+      line: "ClientAliveCountMax 0"
+    - regexp: "^#?PrintLastLog"
+      line: "PrintLastLog no"
+    - regexp: "^#?PermitUserEnvironment"
+      line: "PermitUserEnvironment no"
+    - regexp: "^#?PermitEmptyPasswords"
+      line: "PermitEmptyPasswords no"
+  tags: ssh
+
+- name: add lines to ssh configuration
+  blockinfile:
+    dest: /etc/ssh/sshd_config
+    state: present
+    insertafter: '^IgnoreRhosts'
+    block: |
+      RhostsAuthentication no
+      RhostsRSAAuthentication no
+      RSAAuthentication yes
+      Protocol 2
+  tags: ssh  
+
+- name: Harden pamd./sshd   
+  lineinfile:
+    dest: /etc/pam.d/sshd
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+  with_items:
+    - regexp: "^session    optional     pam_motd.so  motd=/run/motd.dynamic?"
+      line: "#session    optional     pam_motd.so  motd=/run/motd.dynamic"
+    - regexp: "^session    optional     pam_motd.so noupdate?"
+      line: "#session    optional     pam_motd.so noupdate"
+  tags: ssh 
+
+- name: assig new port to ssh
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^#Port'
+    line: 'Port 2277'
+  tags: ssh 
+
+- name: Restart sshd
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: sshd
+  tags: ssh 
+
+

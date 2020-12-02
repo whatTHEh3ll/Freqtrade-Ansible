@@ -1,0 +1,6 @@
+---
+    
+- name: allow root for cron, disable anacron and remove at 
+  become: yes
+  script: secure-cron.sh
+  

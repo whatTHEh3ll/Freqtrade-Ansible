@@ -1,0 +1,5 @@
+---
+- name: secure securetty file
+  become: yes
+  script: tty.sh
+ 

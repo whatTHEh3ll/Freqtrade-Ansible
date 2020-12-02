@@ -1,0 +1,45 @@
+---
+
+- name: Install clamav
+  apt:
+    name: clamav
+    state: present
+
+- name: Install clamav daemon
+  apt:
+    name: clamav-daemon
+    state: present
+ 
+- name: Install cpulimit for clamav 
+  apt:
+    name: cpulimit
+    state: present
+
+- name: "stop clamav-freshclam"
+  systemd:
+      name: clamav-freshclam
+      state: stopped 
+
+- name: "create directory /var/lib/clamav for clamav signatures"
+  become: yes
+  file:
+    path: /var/lib/clamav
+    state: directory
+
+- name: "download clamav signatures to /var/lib/clamav"
+  become: yes
+  get_url:
+    url: https://database.clamav.net/daily.cvd
+    dest: /var/lib/clamav
+
+- name: "start clamav-freshclam"
+  systemd:
+      name: clamav-freshclam
+      state: started
+
+- name: 'enable clam-av as a service'
+  become: yes 
+  systemd:
+    name: clamav-freshclam
+    enabled: yes 
+  

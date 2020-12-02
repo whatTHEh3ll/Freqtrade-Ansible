@@ -1,0 +1,24 @@
+---
+- block:
+
+  - name: 'covermyass : download covermyass'
+    git:
+      repo: https://github.com/sundowndev/go-covermyass
+      dest: /home/{{ user_name }}/go-covermyass
+
+  - name: 'covermyass : install dependancies for covermyass'
+    become: yes
+    become_user: "{{ user_name }}"
+    shell: /home/{{ user_name | quote }}/.go/bin/go get -v -t -d ./...
+    args:
+      chdir: /home/{{ user_name }}/go-covermyass
+
+  - name: 'covermyass : build covermyass'
+    become: yes
+    shell: /home/{{ user_name | quote }}/.go/bin/go build -v .
+    args:
+      chdir: /home/{{ user_name }}/go-covermyass
+
+  tags:
+    - anonymity
+    - hidemyass

@@ -1,0 +1,11 @@
+---
+- name: make sure that only users in the sudo group are able to run the su command in order to act as (or become) root
+  become: yes 
+  shell: dpkg-statoverride --update --add root sudo 4750 /bin/su
+  args:
+    warn: no
+  register: shell_output
+  
+- debug: var=shell_output
+ 
+  

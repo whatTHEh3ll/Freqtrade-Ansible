@@ -1,0 +1,24 @@
+---
+
+- name: Include sysctl variables
+  include_vars: 
+    file: sysctl_config.yml
+  
+- name: Change various sysctl-settings
+  sysctl:
+    name: '{{ item.key }}'
+    value: '{{ item.value }}'
+    sysctl_set: yes
+    state: present
+    reload: yes
+    ignoreerrors: yes
+  with_dict: '{{ sysctl_config }}'
+  
+ 
+ 
+
+ 
+  
+
+
+

@@ -1,0 +1,6 @@
+---
+
+- name: disable irq balance
+  become: yes
+  script: irqbalance.sh
+  ignore_errors: True

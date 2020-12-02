@@ -1,0 +1,5 @@
+
+---
+- include: golang.yml tags=common,golang
+
+

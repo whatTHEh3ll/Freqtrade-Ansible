@@ -1,0 +1,12 @@
+---
+
+ - name: 'reboot machine for shared memory'
+   reboot:
+     reboot_timeout: 1800
+
+ - name: Check the uptime after reboot
+   shell: uptime
+   register: UPTIME_POST_REBOOT
+
+ - debug: msg={{UPTIME_POST_REBOOT.stdout}}
+   

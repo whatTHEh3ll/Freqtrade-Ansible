@@ -1,0 +1,6 @@
+---
+
+- name: disable automount 
+  become: yes
+  script: automount.sh
+  tags: automount

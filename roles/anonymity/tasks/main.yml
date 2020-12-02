@@ -1,0 +1,6 @@
+---
+- include: tor.yml tags=anonymity,tor
+- include: noisy.yml tags=anonymity,noisy
+- include: vpn.yml tags=anonymity,vpn  
+- include: covermyass.yml tags=anonymity,covermyass
+- include: dnscrypt.yml tags=anonymity,dnscrypt

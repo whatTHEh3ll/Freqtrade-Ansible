@@ -1,0 +1,50 @@
+---
+
+- name: set limits on limit.conf 
+  become: yes 
+  shell: sed -i '$d' /etc/security/limits.conf
+  args:
+    warn: no
+  register: shell_output
+
+- debug: var=shell_output
+
+- name: set limits on limit.conf 
+  become: yes 
+  shell: echo "root hard nproc 100" | sudo tee -a /etc/security/limits.conf
+  args:
+    warn: no
+  register: shell_output
+        
+- debug: var=shell_output
+
+- name: set limits on limit.conf 
+  become: yes 
+  shell: echo "@root hard nproc 20" | sudo tee -a /etc/security/limits.conf
+  args:
+    warn: no
+  register: shell_output
+        
+- debug: var=shell_output
+  
+- name: set limits on limit.conf 
+  become: yes 
+  shell: echo "{{ user_name }} hard nproc 100" | sudo tee -a /etc/security/limits.conf
+  args:
+    warn: no
+  register: shell_output
+        
+- debug: var=shell_output
+   
+
+- name: set limits on limit.conf 
+  become: yes 
+  shell: echo "@{{ user_name }} hard nproc 20" | sudo tee -a /etc/security/limits.conf
+  args:
+    warn: no
+  register: shell_output
+        
+- debug: var=shell_output
+  
+
+

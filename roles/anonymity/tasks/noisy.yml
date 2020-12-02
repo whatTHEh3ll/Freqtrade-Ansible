@@ -1,0 +1,22 @@
+---
+- block:
+
+  - name: 'anonymity : download noisy repository'
+    git:
+      repo: https://github.com/1tayH/noisy.git
+      dest: /home/{{ user_name }}/noisy
+  
+  - name: 'anonymity : Install requests library'
+    pip:
+      name: requests
+      executable: pip3
+  
+  - name: 'anonymity : copy custom config to nosiy directory'
+    copy:
+      src: config.json
+      dest: /home/{{ user_name }}/noisy
+      force: yes 
+  
+  tags:
+    - anonymity
+    - noisy 

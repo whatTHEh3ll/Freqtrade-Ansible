@@ -1,0 +1,4 @@
+---
+- name: execute securetmp.sh to lockdown tmp file
+  become: yes
+  script: securetmp.sh 

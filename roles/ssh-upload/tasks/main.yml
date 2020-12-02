@@ -1,0 +1,11 @@
+---
+  
+- name: add second ssh key for mobile access
+  authorized_key:
+    user: "{{ user_name }}"
+    state: present
+    manage_dir: yes
+    key: "{{ lookup('file', '../../../../../../authorized_keys/id_rsa.pub') }}"
+    
+    
+ 

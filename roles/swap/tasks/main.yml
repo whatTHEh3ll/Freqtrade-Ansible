@@ -1,0 +1,6 @@
+---
+- name: execute swap bash script with superuser only
+  become: yes
+  script: swap.sh 
+  
+  

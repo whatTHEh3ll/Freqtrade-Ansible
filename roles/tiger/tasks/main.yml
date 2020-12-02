@@ -1,0 +1,24 @@
+---
+
+- name: Install tiger
+  apt:
+    name: tiger
+    state: present
+  tags: tiger 
+
+- name: Install cpulimit for tiger 
+  apt:
+    name: cpulimit
+    state: present
+
+- name: use tiger to check for rootkits
+  become: yes 
+  shell: cpulimit tiger > tiger-{{ ansible_date_time.date }}.txt
+  args:
+    chdir: /home/{{ user_name }}
+    warn: no
+  
+
+
+
+    

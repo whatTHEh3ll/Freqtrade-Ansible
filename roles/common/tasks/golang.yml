@@ -1,0 +1,31 @@
+---
+- block:
+   
+  - name: 'golang : copy goinstall to install GOLANG bash script to home directory'
+    become: yes
+    become_user: "{{ user_name }}"
+    copy: 
+      src: "goinstall.sh" # the file is present on the same directory
+      dest: "/home/{{ user_name }}"
+      mode: '0755'
+
+  - name: 'golang : execute goinstall script'
+    become: yes
+    become_user: "{{ user_name }}"
+    shell: ./goinstall.sh
+    args:
+      chdir: "/home/{{ user_name }}"
+    register: shell_output
+  - debug: msg={{ shell_output.stdout }}
+
+  - name: 'golang : source bash'
+    become: yes
+    become_user: "{{ user_name }}"
+    shell: /bin/bash -ic 'source /home/{{ user_name | quote }}/.bashrc'
+    register: shell_output
+  - debug: msg={{ shell_output.stdout }}
+
+  tags:
+    - common
+    - golang
+   

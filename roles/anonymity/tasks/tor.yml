@@ -1,0 +1,41 @@
+---
+- block: 
+
+  - name: 'anonymity : Install apt-transport-https'
+    apt:
+      update_cache: yes
+      name: apt-transport-https
+
+  - name: 'anonymity : Add Tor repo GPG signing key to Apt'
+    apt_key:
+      url: "https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc"
+      id: A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89
+      state: present
+
+  - name: 'anonymity : Add Tor repo to Apt sources'
+    apt_repository:
+      repo: "deb https://deb.torproject.org/torproject.org bionic main"
+      update_cache: yes
+      validate_certs: yes
+      state: present
+
+  - name: 'anonymity : Install Tor packages'
+    apt:
+      update_cache: yes
+      name: "{{ tor_packages }}"
+    vars:
+      tor_packages:
+        - tor
+        - deb.torproject.org-keyring
+  
+  - name: 'anonymity : Restart Tor'
+    systemd:
+      name: tor
+      state: restarted
+
+  tags:
+    - anonymity
+    - tor 
+
+
+    

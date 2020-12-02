@@ -1,0 +1,132 @@
+---
+- block:
+
+  - name: 'dnscrypt : purge original dnscrypt package package'
+    apt:
+      name: dnscrypt-proxy
+      state: absent
+      purge: yes 
+
+  - name: 'dnscrypt : add dnscrypt repo'
+    apt_repository:
+      repo: ppa:shevchuk/dnscrypt-proxy
+
+  - name: 'dnscrypt : update cache and install dnscrypt'
+    apt:
+      name: dnscrypt-proxy
+      update_cache: yes
+
+  - name: 'dnscrypt : replace /etc/systemd/resolved.conf to free port 53'
+    become: yes 
+    copy:
+      src: ../../../Ansible-Config/resolved.conf
+      dest: /etc/systemd/resolved.conf
+      force: yes 
+
+  - name: 'dnscrypt : Create a symbolic link for /run/systemd/resolve/resolv.conf /etc/resolv.conf'
+    become: yes
+    shell: ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+    
+  - name: 'dnscrypt : reboot machine to make changes to /etc/resolv.conf'
+    reboot:
+      reboot_timeout: 300
+      
+  - name: 'dnscrypt : Check the uptime after reboot for resolv.conf'
+    shell: uptime
+    register: UPTIME_POST_REBOOT
+ 
+  - debug: msg={{UPTIME_POST_REBOOT.stdout}}
+
+  - name: 'dnscrypt : install reslovconf to make /etc/reslov.conf permanent'
+    apt:
+      name: resolvconf
+      update_cache: yes
+
+  - name: 'dnscrypt : start reslovconf as a service'
+    become: yes 
+    systemd:
+      state: started
+      name: resolvconf.service
+
+  - name: 'dnscrypt : enable reslovconf as a service'
+    become: yes 
+    systemd:
+      name: resolvconf.service
+      enabled: yes 
+
+  - name: 'dnscrypt : append "nameserver 127.0.2.1" to /etc/resolvconf/resolv.conf.d/head'
+    become: yes 
+    shell: echo "nameserver 127.0.2.1" >> /etc/resolvconf/resolv.conf.d/head
+    register: SHELL_OUTPUT
+ 
+  - debug: msg={{SHELL_OUTPUT.stdout}}
+
+  - name: 'dnscrypt : restart reslovconf as a service'
+    become: yes
+    systemd:
+      state: restarted  
+      name: resolvconf.service
+
+  - name: 'dnscrypt : reboot machine to make changes to /etc/resolvconf/resolv.conf.d/head'
+    reboot:
+      reboot_timeout: 300
+      
+  - name: 'dnscrypt : Check the uptime after reboot for /etc/resolvconf/resolv.conf.d/head'
+    shell: uptime
+    register: UPTIME_POST_REBOOT
+ 
+  - debug: msg={{UPTIME_POST_REBOOT.stdout}}
+
+  - name: 'dnscrypt : replace /etc/resolv.conf'
+    become: yes 
+    copy:
+      src: ../../../../../../Ansible-Config/resolv.conf
+      dest: /etc/resolv.conf
+      force: yes 
+
+  - name: 'dnscrypt : copy dnscrypt-proxy.toml to /etc/dnscrypt-proxy/'
+    become: yes
+    copy:
+      src: ../../../Ansible-Config/dnscrypt-proxy.toml
+      dest: /etc/dnscrypt-proxy/dnscrypt-proxy.toml
+      force: yes
+
+  - name: 'dnscrypt : restart dnscrypt-proxy'
+    systemd:
+      state: restarted
+      name: dnscrypt-proxy 
+
+  - name: 'dnscrypt : enable dnscrypt-proxy as a service'
+    become: yes 
+    systemd:
+      name: dnscrypt-proxy
+      enabled: yes 
+
+  - name: 'dnscrypt : enable dnscrypt-proxy.socket as a service'
+    become: yes 
+    systemd:
+      name: dnscrypt-proxy.socket
+      enabled: yes 
+
+  tags:
+    - anonymity
+    - dnscrypt
+
+
+        
+
+  
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  

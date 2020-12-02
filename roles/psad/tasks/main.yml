@@ -1,0 +1,12 @@
+---
+- name: Install psad inrusion detection system
+  become: yes 
+  apt:
+    name: psad
+    state: present
+  
+- name: configure psad with psad-config.sh 
+  become: yes
+  script: psad-config.sh 
+  
+   

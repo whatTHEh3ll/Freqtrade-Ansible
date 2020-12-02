@@ -1,0 +1,80 @@
+---
+- block:
+
+  - name: 'openvpn : Install openvpn'
+    apt:
+      update_cache: yes
+      name: openvpn
+
+  - name: 'openvpn : clone dnsleaktest repository'
+    git:
+      repo:  https://github.com/macvk/dnsleaktest.git
+      dest: /home/{{ user_name }}/dnsleaktest
+
+  - name: 'openvpn : make dnsleak script executable' 
+    file:
+      path: /home/{{ user_name }}/dnsleaktest
+      owner: "{{ user_name }}"
+      group: "{{ user_name }}"
+      mode: '0755'
+ 
+  - name: 'openvpn : Install speedtest-cli with pip3'
+    pip:
+      name: speedtest-cli
+      executable: pip3
+
+  - name: 'openvpn : Create /home/{{ user_name }}/vpn-config directory if it does not exist'
+    become: yes 
+    file:
+      path: /home/{{ user_name }}/vpn-config
+      state: directory
+      mode: '0644'
+
+  - name: 'openvpn : copy vpnsecure and ra4wvpn to /home/{{ user_name }}/vpn-config'
+    become: yes
+    copy:
+      src: ../../../../../../Ansible-Config/vpn-config/
+      dest: /home/{{ user_name }}/vpn-config
+      decrypt: yes
+      mode: '0644'
+
+  - name: 'openvpn : copy pass.txt to /etc/openvpn for ra4wvpn'
+    become: yes
+    copy:
+      src: ../../../../../../Ansible-Config/vpn-config/pass.txt
+      dest: /etc/openvpn
+      decrypt: yes
+      mode: u=rw,g=r,o=r
+
+  - name: 'openvpn : copy auth.txt to /etc/openvpn for vpnsecure configuration'
+    become: yes
+    copy:
+      src: ../../../../../../Ansible-Config/vpn-config/pass.txt
+      dest: /etc/openvpn
+      decrypt: yes
+      mode: u=rw,g=r,o=r
+
+  - name: 'openvpn : stop openvpn service'
+    become: yes
+    systemd:
+      state: stopped
+      name: openvpn
+  
+  - name: 'openvpn : copy vpnrestart.sh script to /etc/openvpn'
+    become: yes
+    copy:
+      src: vpnrestart.sh
+      dest: /etc/openvpn
+      mode: '0755'
+  
+  - name: 'openvpn : create cronjob for vpnrestart script'
+    become: yes 
+    cron:
+      name: vpnrestart 
+      minute: "5"
+      user: root
+      job: /etc/openvpn/checkopenvpn.sh >> /var/log/checkopenvpn.log 2>&1
+
+  tags:
+    - anonymity
+    - vpn  

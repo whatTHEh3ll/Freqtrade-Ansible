@@ -1,0 +1,19 @@
+---
+
+- name: Copy linushealthcheck script to /usr/local/bin
+  copy:
+    src: health.sh
+    dest: /usr/local/bin
+    owner: root
+    group: root
+    mode: '0755'
+  tags: scripts
+
+- name: Copy security script to /home/{{ user_name }}
+  copy:
+    src: security.sh
+    dest: /home/{{ user_name }}
+    owner: root
+    group: root
+    mode: '0755'
+  tags: scripts 

@@ -1,0 +1,6 @@
+---
+- name: execute sharedmem bash script with superuser only
+  become: yes
+  script: sharedmem.sh 
+  
+  
